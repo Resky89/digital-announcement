@@ -1,0 +1,427 @@
+{
+  "info": {
+    "_postman_id": "8f0a9d63-4c0b-4c8c-9a9b-3a4a0a5c9b4e",
+    "name": "Announcement API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for the Announcement API (Laravel). Uses collection variables for baseUrl, JWT token, and example IDs."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const data = pm.response.json();",
+                  "    if (data.access_token) pm.collectionVariables.set('token', data.access_token);",
+                  "    if (data.refresh_token) pm.collectionVariables.set('refresh_token', data.refresh_token);",
+                  "    if (data.csrf_token) pm.collectionVariables.set('csrf_token', data.csrf_token);",
+                  "  } catch (e) { /* ignore */ }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{refresh_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/auth/refresh"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  try {",
+                  "    const data = pm.response.json();",
+                  "    if (data.access_token) pm.collectionVariables.set('token', data.access_token);",
+                  "    if (data.csrf_token) pm.collectionVariables.set('csrf_token', data.csrf_token);",
+                  "  } catch (e) { /* ignore */ }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Root health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          },
+          "response": []
+        },
+        {
+          "name": "Health status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Announcements",
+          "item": [
+            {
+              "name": "List announcements",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/public/announcements"
+              },
+              "response": []
+            },
+            {
+              "name": "Get announcement by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/public/announcements/{{announcementId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Assets",
+          "item": [
+            {
+              "name": "Get asset by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/public/assets/{{assetId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Stream asset by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/public/assets/{{assetId}}/stream"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin (JWT protected)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "List users",
+              "request": {
+                "method": "GET",
+                "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+                "url": "{{baseUrl}}/api/admin/users"
+              },
+              "response": []
+            },
+            {
+              "name": "Create user",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"User Baru\",\n  \"email\": \"user.baru@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/users"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try { const data = pm.response.json(); if (data && data.id) pm.collectionVariables.set('userId', data.id); } catch (e) {}",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Get user by id",
+              "request": {
+                "method": "GET",
+                "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+                "url": "{{baseUrl}}/api/admin/users/{{userId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Update user",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"name\": \"User Diupdate\"\n}" },
+                "url": "{{baseUrl}}/api/admin/users/{{userId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete user",
+              "request": {
+                "method": "DELETE",
+                "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+                "url": "{{baseUrl}}/api/admin/users/{{userId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Announcements",
+          "item": [
+            {
+              "name": "Create announcement",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Pengumuman Baru\",\n  \"content\": \"Konten pengumuman\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/announcements"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const data = pm.response.json();",
+                      "    if (data && data.id) { pm.collectionVariables.set('announcementId', data.id); }",
+                      "  } catch (e) { /* ignore */ }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Replace announcement by id",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Pengumuman Diupdate (PUT)\",\n  \"content\": \"Konten diupdate\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/announcements/{{announcementId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Update announcement by id",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Pengumuman Diupdate (PATCH)\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/announcements/{{announcementId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete announcement by id",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/admin/announcements/{{announcementId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Assets",
+          "item": [
+            {
+              "name": "Create asset",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"announcement_id\": {{announcementId}},\n  \"file_name\": \"gambar_1.jpg\",\n  \"file_path\": \"/assets/gambar_1.jpg\",\n  \"file_type\": \"image/jpeg\"\n}"
+                },
+                "url": "{{baseUrl}}/api/admin/assets"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                      "  try {",
+                      "    const data = pm.response.json();",
+                      "    if (data && data.id) { pm.collectionVariables.set('assetId', data.id); }",
+                      "  } catch (e) { /* ignore */ }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Delete asset by id",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/admin/assets/{{assetId}}"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT Bearer token. Set this after obtaining a token from your authentication endpoint."
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT refresh token obtained from /api/auth/login."
+    },
+    {
+      "key": "csrf_token",
+      "value": "",
+      "type": "string",
+      "description": "CSRF token returned by login/refresh for client-side use."
+    },
+    {
+      "key": "announcementId",
+      "value": "1",
+      "type": "string",
+      "description": "Sample announcement ID used in requests."
+    },
+    {
+      "key": "assetId",
+      "value": "1",
+      "type": "string",
+      "description": "Sample asset ID used in requests."
+    }
+    ,
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string",
+      "description": "User ID used by admin endpoints."
+    }
+  ]
+}

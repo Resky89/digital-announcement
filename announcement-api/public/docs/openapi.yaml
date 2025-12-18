@@ -1,0 +1,611 @@
+openapi: 3.0.3
+info:
+  title: Announcement API
+  version: "1.0.0"
+  description: |
+    OpenAPI specification for the Announcement API.
+    
+    Servers default to localhost:8000 per docker-compose.
+servers:
+  - url: http://localhost:8000
+    description: Local API (Nginx -> PHP-FPM)
+tags:
+  - name: Health
+  - name: Public
+  - name: Admin
+  - name: Auth
+paths:
+  /:
+    get:
+      tags: [Health]
+      summary: Root health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  app:
+                    type: string
+                  env:
+                    type: string
+                  time:
+                    type: string
+                    format: date-time
+  /health:
+    get:
+      tags: [Health]
+      summary: Health endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  app:
+                    type: string
+                  env:
+                    type: string
+                  time:
+                    type: string
+                    format: date-time
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token using refresh token
+      description: Use refresh token as Bearer Authorization
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthRefreshResponse'
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current access token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+  /api/public/announcements:
+    get:
+      tags: [Public]
+      summary: List announcements
+      responses:
+        '200':
+          description: List of announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Announcement'
+  /api/public/announcements/{announcementId}:
+    get:
+      tags: [Public]
+      summary: Get announcement by ID
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Announcement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '404':
+          description: Not Found
+  /api/public/assets/{assetId}:
+    get:
+      tags: [Public]
+      summary: Get asset metadata by ID
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Asset metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '404':
+          description: Not Found
+  /api/public/assets/{assetId}/stream:
+    get:
+      tags: [Public]
+      summary: Stream/download asset file by ID
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Binary stream of the asset
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Not Found
+  /api/admin/announcements:
+    post:
+      tags: [Admin]
+      summary: Create announcement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, content]
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+  /api/admin/announcements/{announcementId}:
+    put:
+      tags: [Admin]
+      summary: Replace announcement (PUT)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, content]
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+    patch:
+      tags: [Admin]
+      summary: Update announcement (PATCH)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+    delete:
+      tags: [Admin]
+      summary: Delete announcement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+  /api/admin/assets:
+    post:
+      tags: [Admin]
+      summary: Create asset metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [announcement_id, file_name, file_path, file_type]
+              properties:
+                announcement_id:
+                  type: integer
+                file_name:
+                  type: string
+                file_path:
+                  type: string
+                  example: /assets/gambar_1.jpg
+                file_type:
+                  type: string
+                  example: image/jpeg
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '401':
+          description: Unauthorized
+  /api/admin/assets/{assetId}:
+    delete:
+      tags: [Admin]
+      summary: Delete asset metadata
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: List users (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 15
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+    post:
+      tags: [Admin]
+      summary: Create user (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/admin/users/{userId}:
+    get:
+      tags: [Admin]
+      summary: Get user by ID (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+    put:
+      tags: [Admin]
+      summary: Replace user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+    patch:
+      tags: [Admin]
+      summary: Update user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+    delete:
+      tags: [Admin]
+      summary: Delete user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+        '404':
+          description: Not Found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Pengumuman 1
+        content:
+          type: string
+          example: Konten pengumuman 1
+        author_id:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Asset:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        announcement_id:
+          type: integer
+          example: 1
+        file_name:
+          type: string
+          example: gambar_1.jpg
+        file_path:
+          type: string
+          example: /assets/gambar_1.jpg
+        file_type:
+          type: string
+          example: image/jpeg
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+    AuthLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: secret
+    AuthLoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        csrf_token:
+          type: string
+          example: i2c0c0a1f4e54a9f9b1e0b3c6d7e8f9a0b1c2d3e
+    AuthRefreshResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        csrf_token:
+          type: string
+          example: 6b7c8d9e0a1b2c3d4e5f60718293a4b5c6d7e8f9
+    LogoutResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Logged out
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Admin
+        email:
+          type: string
+          example: admin@example.com
+        role:
+          type: string
+          enum: [admin, user]
+          example: admin
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    UserCreateRequest:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        role:
+          type: string
+          enum: [admin, user]
+    UserUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        role:
+          type: string
+          enum: [admin, user]
