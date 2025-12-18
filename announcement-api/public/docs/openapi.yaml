@@ -10,10 +10,13 @@ servers:
   - url: http://localhost:8000
     description: Local API (Nginx -> PHP-FPM)
 tags:
-  - name: Health
-  - name: Public
-  - name: Admin
   - name: Auth
+  - name: Health
+  - name: Public - Announcements
+  - name: Public - Assets
+  - name: Admin - Users
+  - name: Admin - Announcements
+  - name: Admin - Assets
 paths:
   /:
     get:
@@ -105,7 +108,7 @@ paths:
                 $ref: '#/components/schemas/LogoutResponse'
   /api/public/announcements:
     get:
-      tags: [Public]
+      tags: [Public - Announcements]
       summary: List announcements
       responses:
         '200':
@@ -118,7 +121,7 @@ paths:
                   $ref: '#/components/schemas/Announcement'
   /api/public/announcements/{announcementId}:
     get:
-      tags: [Public]
+      tags: [Public - Announcements]
       summary: Get announcement by ID
       parameters:
         - name: announcementId
@@ -137,7 +140,7 @@ paths:
           description: Not Found
   /api/public/assets/{assetId}:
     get:
-      tags: [Public]
+      tags: [Public - Assets]
       summary: Get asset metadata by ID
       parameters:
         - name: assetId
@@ -156,7 +159,7 @@ paths:
           description: Not Found
   /api/public/assets/{assetId}/stream:
     get:
-      tags: [Public]
+      tags: [Public - Assets]
       summary: Stream/download asset file by ID
       parameters:
         - name: assetId
@@ -176,7 +179,7 @@ paths:
           description: Not Found
   /api/admin/announcements:
     post:
-      tags: [Admin]
+      tags: [Admin - Announcements]
       summary: Create announcement
       security:
         - bearerAuth: []
@@ -203,7 +206,7 @@ paths:
           description: Unauthorized
   /api/admin/announcements/{announcementId}:
     put:
-      tags: [Admin]
+      tags: [Admin - Announcements]
       summary: Replace announcement (PUT)
       security:
         - bearerAuth: []
@@ -237,7 +240,7 @@ paths:
         '404':
           description: Not Found
     patch:
-      tags: [Admin]
+      tags: [Admin - Announcements]
       summary: Update announcement (PATCH)
       security:
         - bearerAuth: []
@@ -270,7 +273,7 @@ paths:
         '404':
           description: Not Found
     delete:
-      tags: [Admin]
+      tags: [Admin - Announcements]
       summary: Delete announcement
       security:
         - bearerAuth: []
@@ -289,7 +292,7 @@ paths:
           description: Not Found
   /api/admin/assets:
     post:
-      tags: [Admin]
+      tags: [Admin - Assets]
       summary: Create asset metadata
       security:
         - bearerAuth: []
@@ -322,7 +325,7 @@ paths:
           description: Unauthorized
   /api/admin/assets/{assetId}:
     delete:
-      tags: [Admin]
+      tags: [Admin - Assets]
       summary: Delete asset metadata
       security:
         - bearerAuth: []
@@ -341,7 +344,7 @@ paths:
           description: Not Found
   /api/admin/users:
     get:
-      tags: [Admin]
+      tags: [Admin - Users]
       summary: List users (admin only)
       security:
         - bearerAuth: []
@@ -364,7 +367,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/User'
     post:
-      tags: [Admin]
+      tags: [Admin - Users]
       summary: Create user (admin only)
       security:
         - bearerAuth: []
@@ -383,7 +386,7 @@ paths:
                 $ref: '#/components/schemas/User'
   /api/admin/users/{userId}:
     get:
-      tags: [Admin]
+      tags: [Admin - Users]
       summary: Get user by ID (admin only)
       security:
         - bearerAuth: []
@@ -403,7 +406,7 @@ paths:
         '404':
           description: Not Found
     put:
-      tags: [Admin]
+      tags: [Admin - Users]
       summary: Replace user (admin only)
       security:
         - bearerAuth: []
@@ -429,7 +432,7 @@ paths:
         '404':
           description: Not Found
     patch:
-      tags: [Admin]
+      tags: [Admin - Users]
       summary: Update user (admin only)
       security:
         - bearerAuth: []
@@ -455,7 +458,7 @@ paths:
         '404':
           description: Not Found
     delete:
-      tags: [Admin]
+      tags: [Admin - Users]
       summary: Delete user (admin only)
       security:
         - bearerAuth: []
@@ -570,10 +573,6 @@ components:
         email:
           type: string
           example: admin@example.com
-        role:
-          type: string
-          enum: [admin, user]
-          example: admin
         created_at:
           type: string
           format: date-time
@@ -582,7 +581,7 @@ components:
           format: date-time
     UserCreateRequest:
       type: object
-      required: [name, email, password, role]
+      required: [name, email, password]
       properties:
         name:
           type: string
@@ -592,9 +591,6 @@ components:
         password:
           type: string
           minLength: 8
-        role:
-          type: string
-          enum: [admin, user]
     UserUpdateRequest:
       type: object
       properties:
@@ -606,6 +602,3 @@ components:
         password:
           type: string
           minLength: 8
-        role:
-          type: string
-          enum: [admin, user]
