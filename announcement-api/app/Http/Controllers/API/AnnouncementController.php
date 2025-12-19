@@ -7,12 +7,25 @@ use App\Http\Requests\StoreAnnouncementRequest;
 use App\Http\Requests\UpdateAnnouncementRequest;
 use App\Models\Announcement;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = Announcement::with(['author', 'assets'])->latest()->paginate(10);
+        $perPage = (int) $request->query('per_page', 10);
+        $search = (string) $request->query('search', '');
+
+        $query = Announcement::with(['author', 'assets'])->latest();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->paginate($perPage);
         return response()->json($items);
     }
 

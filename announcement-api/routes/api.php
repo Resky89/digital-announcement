@@ -31,6 +31,7 @@ Route::prefix('admin')->middleware(['auth:api', 'admin'])->group(function () {
     Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy']);
 
     Route::post('assets', [AssetController::class, 'store']);
+    Route::get('assets', [AssetController::class, 'index']);
     Route::delete('assets/{asset}', [AssetController::class, 'destroy']);
 
     Route::get('users', [UserController::class, 'index']);

@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       csrfToken: null,
       isAuthenticated: false,
-      isLoading: true,
+      isLoading: false,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
 
@@ -67,6 +67,8 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: false });
           return;
         }
+
+        set({ isLoading: true });
 
         try {
           const user = await authApi.getMe();
