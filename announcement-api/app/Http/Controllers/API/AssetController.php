@@ -18,10 +18,12 @@ class AssetController extends Controller
         $search = (string) $request->query('search', '');
         $announcementId = $request->query('announcement_id');
 
-        $query = Asset::with('announcement:id,title')->latest('created_at');
+        $query = Asset::with('announcements:id,title')->latest('created_at');
 
         if (!is_null($announcementId)) {
-            $query->where('announcement_id', (int) $announcementId);
+            $query->whereHas('announcements', function ($q) use ($announcementId) {
+                $q->where('announcements.id', (int) $announcementId);
+            });
         }
 
         if ($search !== '') {
@@ -41,7 +43,6 @@ class AssetController extends Controller
         $fileName = $request->input('file_name') ?: $stored['file_name'];
 
         $asset = Asset::create([
-            'announcement_id' => null,
             'file_name' => $fileName,
             'file_path' => $stored['file_path'],
             'file_type' => $stored['file_type'],
@@ -53,6 +54,7 @@ class AssetController extends Controller
 
     public function show(Asset $asset)
     {
+        $asset->load('announcements:id,title');
         return response()->json($asset);
     }
 

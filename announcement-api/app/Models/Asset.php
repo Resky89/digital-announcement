@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Asset extends Model
 {
@@ -13,7 +13,6 @@ class Asset extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'announcement_id',
         'file_name',
         'file_path',
         'file_type',
@@ -24,8 +23,12 @@ class Asset extends Model
         'created_at' => 'datetime',
     ];
 
-    public function announcement(): BelongsTo
+    protected $hidden = [
+        'pivot',
+    ];
+
+    public function announcements(): BelongsToMany
     {
-        return $this->belongsTo(Announcement::class);
+        return $this->belongsToMany(Announcement::class, 'announcement_asset', 'asset_id', 'announcement_id');
     }
 }

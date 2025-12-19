@@ -38,9 +38,9 @@ class AnnouncementController extends Controller
         $data['author_id'] = Auth::id();
         $announcement = Announcement::create($data);
 
-        // Attach existing assets if provided
+        // Attach existing assets via pivot if provided
         if (!empty($assetIds)) {
-            Asset::whereIn('id', $assetIds)->update(['announcement_id' => $announcement->id]);
+            $announcement->assets()->attach($assetIds);
         }
 
         $announcement->load(['author', 'assets']);
@@ -64,15 +64,7 @@ class AnnouncementController extends Controller
         }
 
         if (is_array($assetIds)) {
-            // Detach assets not included anymore
-            Asset::where('announcement_id', $announcement->id)
-                ->whereNotIn('id', $assetIds)
-                ->update(['announcement_id' => null]);
-
-            // Attach the provided assets
-            if (!empty($assetIds)) {
-                Asset::whereIn('id', $assetIds)->update(['announcement_id' => $announcement->id]);
-            }
+            $announcement->assets()->sync($assetIds);
         }
 
         $announcement->load(['author', 'assets']);

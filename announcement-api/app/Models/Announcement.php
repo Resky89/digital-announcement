@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Announcement extends Model
 {
@@ -22,8 +22,8 @@ class Announcement extends Model
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    public function assets(): HasMany
+    public function assets(): BelongsToMany
     {
-        return $this->hasMany(Asset::class);
+        return $this->belongsToMany(Asset::class, 'announcement_asset', 'announcement_id', 'asset_id');
     }
 }
