@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreAssetRequest extends FormRequest
+class UpdateAssetRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,7 +15,7 @@ class StoreAssetRequest extends FormRequest
     {
         return [
             'file_name' => 'sometimes|string|max:255',
-            'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg,pdf|max:5120',
+            'file' => 'sometimes|file|mimes:jpg,jpeg,png,gif,svg,pdf|max:5120',
         ];
     }
 }

@@ -16,6 +16,8 @@ class UpdateAnnouncementRequest extends FormRequest
         return [
             'title' => 'sometimes|required|string|max:255',
             'content' => 'sometimes|required|string',
+            'asset_ids' => 'sometimes|array',
+            'asset_ids.*' => 'integer|exists:assets,id',
         ];
     }
 }

@@ -253,16 +253,12 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
                 ],
                 "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    { "key": "title", "type": "text", "value": "Pengumuman Baru" },
-                    { "key": "content", "type": "text", "value": "Konten pengumuman" },
-                    { "key": "assets[]", "type": "file", "src": "" },
-                    { "key": "assets[]", "type": "file", "src": "" }
-                  ]
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Pengumuman Baru\",\n  \"content\": \"Konten pengumuman\",\n  \"asset_ids\": [{{assetId}}]\n}"
                 },
                 "url": "{{baseUrl}}/api/admin/announcements"
               },
@@ -296,7 +292,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Pengumuman Diupdate (PUT)\",\n  \"content\": \"Konten diupdate\"\n}"
+                  "raw": "{\n  \"title\": \"Pengumuman Diupdate (PUT)\",\n  \"content\": \"Konten diupdate\",\n  \"asset_ids\": [{{assetId}}]\n}"
                 },
                 "url": "{{baseUrl}}/api/admin/announcements/{{announcementId}}"
               },
@@ -314,7 +310,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Pengumuman Diupdate (PATCH)\"\n}"
+                  "raw": "{\n  \"title\": \"Pengumuman Diupdate (PATCH)\",\n  \"asset_ids\": [{{assetId}}]\n}"
                 },
                 "url": "{{baseUrl}}/api/admin/announcements/{{announcementId}}"
               },
@@ -344,7 +340,7 @@
                 "body": {
                   "mode": "formdata",
                   "formdata": [
-                    { "key": "announcement_id", "value": "{{announcementId}}", "type": "text" },
+                    { "key": "file_name", "type": "text", "value": "" },
                     { "key": "file", "type": "file", "src": "" }
                   ]
                 },
@@ -366,6 +362,24 @@
                   }
                 }
               ],
+              "response": []
+            },
+            {
+              "name": "Update asset by id",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "file_name", "type": "text", "value": "" },
+                    { "key": "file", "type": "file", "src": "" }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/admin/assets/{{assetId}}"
+              },
               "response": []
             },
             {

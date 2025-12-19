@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 class AssetService
 {
-    public function store(UploadedFile $file, int $announcementId): array
+    public function store(UploadedFile $file): array
     {
         $extension = strtolower($file->getClientOriginalExtension());
         $type = in_array($extension, ['pdf']) ? 'pdf' : 'image';
@@ -18,7 +18,6 @@ class AssetService
         $path = $file->storeAs($dir, $filename, 'announcement_assets');
 
         return [
-            'announcement_id' => $announcementId,
             'file_name' => $file->getClientOriginalName(),
             'file_path' => $path,
             'file_type' => $type,
@@ -27,6 +26,14 @@ class AssetService
 
     public function delete(string $path): void
     {
-        Storage::disk('announcement_assets')->delete($path);
+        $root = config('filesystems.disks.announcement_assets.root');
+        if (!$root || !is_dir($root)) {
+            return;
+        }
+        try {
+            Storage::disk('announcement_assets')->delete($path);
+        } catch (\Throwable $e) {
+            // no-op: avoid throwing on delete when storage is unavailable
+        }
     }
 }

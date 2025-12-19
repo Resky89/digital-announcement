@@ -32,6 +32,8 @@ Route::prefix('admin')->middleware(['auth:api', 'admin'])->group(function () {
 
     Route::post('assets', [AssetController::class, 'store']);
     Route::get('assets', [AssetController::class, 'index']);
+    Route::put('assets/{asset}', [AssetController::class, 'update']);
+    Route::patch('assets/{asset}', [AssetController::class, 'update']);
     Route::delete('assets/{asset}', [AssetController::class, 'destroy']);
 
     Route::get('users', [UserController::class, 'index']);

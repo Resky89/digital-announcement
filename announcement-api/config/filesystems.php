@@ -60,7 +60,7 @@ return [
         // Default points to ../announcement-asset relative to the API project root.
         'announcement_assets' => [
             'driver' => 'local',
-            'root' => env('ANNOUNCEMENT_ASSETS_PATH', base_path('..'.DIRECTORY_SEPARATOR.'announcement-asset')),
+            'root' => env('ANNOUNCEMENT_ASSETS_PATH', storage_path('app'.DIRECTORY_SEPARATOR.'announcement-asset')),
             'throw' => false,
             'report' => false,
         ],

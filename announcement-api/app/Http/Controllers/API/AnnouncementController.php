@@ -7,7 +7,6 @@ use App\Http\Requests\StoreAnnouncementRequest;
 use App\Http\Requests\UpdateAnnouncementRequest;
 use App\Models\Announcement;
 use App\Models\Asset;
-use App\Services\AssetService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -31,28 +30,17 @@ class AnnouncementController extends Controller
         return response()->json($items);
     }
 
-    public function store(StoreAnnouncementRequest $request, AssetService $assetService)
+    public function store(StoreAnnouncementRequest $request)
     {
         $data = $request->validated();
-        $files = $request->file('assets', []);
-        unset($data['assets']);
+        $assetIds = isset($data['asset_ids']) && is_array($data['asset_ids']) ? $data['asset_ids'] : [];
+        unset($data['asset_ids']);
         $data['author_id'] = Auth::id();
         $announcement = Announcement::create($data);
 
-        // Save assets if provided
-        if (is_array($files)) {
-            foreach ($files as $file) {
-                if ($file) {
-                    $stored = $assetService->store($file, (int) $announcement->id);
-                    Asset::create([
-                        'announcement_id' => $stored['announcement_id'],
-                        'file_name' => $stored['file_name'],
-                        'file_path' => $stored['file_path'],
-                        'file_type' => $stored['file_type'],
-                        'created_at' => now(),
-                    ]);
-                }
-            }
+        // Attach existing assets if provided
+        if (!empty($assetIds)) {
+            Asset::whereIn('id', $assetIds)->update(['announcement_id' => $announcement->id]);
         }
 
         $announcement->load(['author', 'assets']);
@@ -67,7 +55,26 @@ class AnnouncementController extends Controller
 
     public function update(UpdateAnnouncementRequest $request, Announcement $announcement)
     {
-        $announcement->update($request->validated());
+        $data = $request->validated();
+        $assetIds = isset($data['asset_ids']) && is_array($data['asset_ids']) ? $data['asset_ids'] : null;
+        unset($data['asset_ids']);
+
+        if (!empty($data)) {
+            $announcement->update($data);
+        }
+
+        if (is_array($assetIds)) {
+            // Detach assets not included anymore
+            Asset::where('announcement_id', $announcement->id)
+                ->whereNotIn('id', $assetIds)
+                ->update(['announcement_id' => null]);
+
+            // Attach the provided assets
+            if (!empty($assetIds)) {
+                Asset::whereIn('id', $assetIds)->update(['announcement_id' => $announcement->id]);
+            }
+        }
+
         $announcement->load(['author', 'assets']);
         return response()->json($announcement);
     }
