@@ -162,7 +162,7 @@ export default function AnnouncementDetailPage() {
                 const FileIcon = getFileIcon(asset.file_type);
                 const isImage = isImageFile(asset.file_type);
                 const isVideo = isVideoFile(asset.file_type);
-                const streamUrl = `${API_BASE_URL}/api/public/assets/${asset.id}/stream`;
+                const staticUrl = `${API_BASE_URL}/${asset.file_path}`;
 
                 return (
                   <div
@@ -173,13 +173,13 @@ export default function AnnouncementDetailPage() {
                     {isImage ? (
                       <div className="relative h-48 bg-slate-100 dark:bg-slate-900">
                         <img
-                          src={streamUrl}
+                          src={staticUrl}
                           alt={asset.file_name}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                           <a
-                            href={streamUrl}
+                            href={staticUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="opacity-0 group-hover:opacity-100 transition-opacity"
@@ -194,7 +194,7 @@ export default function AnnouncementDetailPage() {
                     ) : isVideo ? (
                       <div className="relative h-48">
                         <video
-                          src={streamUrl}
+                          src={staticUrl}
                           controls
                           className="w-full h-full object-cover"
                         />
@@ -203,7 +203,7 @@ export default function AnnouncementDetailPage() {
                       <div className="h-32 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900">
                         <FileIcon className="w-12 h-12 text-slate-400 mb-2" />
                         <span className="text-xs text-slate-500 uppercase">
-                          {asset.file_type.split("/")[1] || "File"}
+                          {asset.file_type === 'pdf' ? 'PDF' : (asset.file_type.split('/')[1] || 'FILE')}
                         </span>
                       </div>
                     )}
@@ -215,10 +215,10 @@ export default function AnnouncementDetailPage() {
                       </p>
                       <div className="flex items-center justify-between mt-3">
                         <Badge variant="default" size="sm">
-                          {asset.file_type.split("/")[1]?.toUpperCase() || "FILE"}
+                          {(asset.file_type === 'pdf' ? 'PDF' : (asset.file_type.split('/')[1]?.toUpperCase() || 'FILE'))}
                         </Badge>
                         <a
-                          href={streamUrl}
+                          href={staticUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium inline-flex items-center gap-1"

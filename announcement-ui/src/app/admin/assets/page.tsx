@@ -184,7 +184,7 @@ export default function AdminAssetsPage() {
                 <div className="relative h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                   {isImage ? (
                     <img
-                      src={`${API_BASE_URL}/api/public/assets/${asset.id}/stream`}
+                      src={`${API_BASE_URL}/${asset.file_path}`}
                       alt={asset.file_name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -338,7 +338,7 @@ export default function AdminAssetsPage() {
           <div className="flex items-center justify-center min-h-[300px]">
             {isImageFile(previewAsset.file_type) ? (
               <img
-                src={`${API_BASE_URL}/api/public/assets/${previewAsset.id}/stream`}
+                src={`${API_BASE_URL}/${previewAsset.file_path}`}
                 alt={previewAsset.file_name}
                 className="max-w-full max-h-[60vh] object-contain rounded-lg"
               />
@@ -346,7 +346,7 @@ export default function AdminAssetsPage() {
               <video
                 controls
                 className="max-w-full max-h-[60vh] rounded-lg"
-                src={`${API_BASE_URL}/api/public/assets/${previewAsset.id}/stream`}
+                src={`${API_BASE_URL}/${previewAsset.file_path}`}
               />
             ) : (
               <div className="text-center">
@@ -355,7 +355,7 @@ export default function AdminAssetsPage() {
                   Preview tidak tersedia untuk tipe file ini
                 </p>
                 <a
-                  href={`${API_BASE_URL}/api/public/assets/${previewAsset.id}/stream`}
+                  href={`${API_BASE_URL}/${previewAsset.file_path}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 mt-4 text-indigo-600 hover:text-indigo-700"

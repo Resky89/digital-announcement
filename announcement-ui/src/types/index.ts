@@ -24,7 +24,6 @@ export interface Announcement {
 // Asset types
 export interface Asset {
   id: number;
-  announcement_id: number;
   file_name: string;
   file_path: string;
   file_type: string;
@@ -91,9 +90,3 @@ export interface UpdateAnnouncementPayload {
   content?: string;
 }
 
-export interface CreateAssetPayload {
-  announcement_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-}
