@@ -14,16 +14,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { isAuthenticated, isLoading, fetchUser } = useAuthStore();
   const { sidebarOpen } = useUIStore();
+  
+  const isLoginPage = pathname === ROUTES.ADMIN.LOGIN;
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push(ROUTES.LOGIN);
+    if (!isLoginPage) {
+      fetchUser();
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [fetchUser, isLoginPage]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !isLoginPage) {
+      router.push(ROUTES.ADMIN.LOGIN);
+    }
+  }, [isLoading, isAuthenticated, router, isLoginPage]);
+
+  // For login page, render without sidebar
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return <LoadingScreen message="Memuat..." />;

@@ -63,12 +63,12 @@ apiClient.interceptors.response.use(
         } catch (refreshError) {
           // Refresh failed, logout user
           logout();
-          window.location.href = '/login';
+          window.location.href = '/admin/login';
           return Promise.reject(refreshError);
         }
       } else {
         logout();
-        window.location.href = '/login';
+        window.location.href = '/admin/login';
       }
     }
     

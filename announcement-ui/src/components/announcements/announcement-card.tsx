@@ -40,13 +40,17 @@ export function AnnouncementCard({ announcement, variant = 'default' }: Announce
   return (
     <Link href={ROUTES.USER.ANNOUNCEMENT_DETAIL(announcement.id)}>
       <Card hover variant="glass" className="h-full overflow-hidden group">
-        {/* Image preview for first image asset */}
-        {hasAssets && announcement.assets?.[0]?.file_type?.startsWith('image/') && (
-          <div className="relative h-48 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 animate-pulse" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-          </div>
-        )}
+        {/* Media preview area (keeps consistent height) */}
+        <div className="relative h-48 overflow-hidden">
+          {hasAssets && announcement.assets?.[0]?.file_type?.startsWith('image/') ? (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800" />
+          )}
+        </div>
 
         <CardContent className="p-6">
           {/* Title */}

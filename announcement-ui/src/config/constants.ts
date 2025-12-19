@@ -32,10 +32,11 @@ export const API_ENDPOINTS = {
 // Route paths
 export const ROUTES = {
   HOME: '/',
-  LOGIN: '/login',
+  LOGIN: '/admin/login',
   DASHBOARD: '/dashboard',
   ADMIN: {
     HOME: '/admin',
+    LOGIN: '/admin/login',
     USERS: '/admin/users',
     ANNOUNCEMENTS: '/admin/announcements',
     ASSETS: '/admin/assets',

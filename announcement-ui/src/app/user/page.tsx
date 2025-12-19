@@ -17,9 +17,12 @@ export default function UserHomePage() {
     const fetchAnnouncements = async () => {
       try {
         const data = await announcementsApi.getAll();
-        setAnnouncements(data);
+        // Ensure data is always an array
+        const announcementsData = Array.isArray(data) ? data : [];
+        setAnnouncements(announcementsData);
       } catch (error) {
         console.error("Failed to fetch announcements:", error);
+        setAnnouncements([]);
       } finally {
         setIsLoading(false);
       }
@@ -28,7 +31,7 @@ export default function UserHomePage() {
     fetchAnnouncements();
   }, []);
 
-  const latestAnnouncement = announcements[0];
+  const latestAnnouncement = announcements.length > 0 ? announcements[0] : null;
   const recentAnnouncements = announcements.slice(0, 6);
 
   return (

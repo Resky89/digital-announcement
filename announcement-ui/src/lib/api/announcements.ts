@@ -5,13 +5,26 @@ import type { Announcement, CreateAnnouncementPayload, UpdateAnnouncementPayload
 export const announcementsApi = {
   // Public
   getAll: async (): Promise<Announcement[]> => {
-    const response = await apiClient.get<Announcement[]>(API_ENDPOINTS.PUBLIC.ANNOUNCEMENTS);
-    return response.data;
+    const response = await apiClient.get(API_ENDPOINTS.PUBLIC.ANNOUNCEMENTS);
+    const payload: any = response.data;
+    const list =
+      Array.isArray(payload) ? payload :
+      Array.isArray(payload?.data) ? payload.data :
+      Array.isArray(payload?.results) ? payload.results :
+      Array.isArray(payload?.items) ? payload.items :
+      Array.isArray(payload?.announcements) ? payload.announcements :
+      Array.isArray(payload?.data?.data) ? payload.data.data : [];
+    return list as Announcement[];
   },
 
   getById: async (id: number): Promise<Announcement> => {
-    const response = await apiClient.get<Announcement>(API_ENDPOINTS.PUBLIC.ANNOUNCEMENT_DETAIL(id));
-    return response.data;
+    const response = await apiClient.get(API_ENDPOINTS.PUBLIC.ANNOUNCEMENT_DETAIL(id));
+    const payload: any = response.data;
+    const obj =
+      (payload && typeof payload === 'object' && payload.data) ? payload.data :
+      (payload && typeof payload === 'object' && payload.announcement) ? payload.announcement :
+      payload;
+    return obj as Announcement;
   },
 
   // Admin

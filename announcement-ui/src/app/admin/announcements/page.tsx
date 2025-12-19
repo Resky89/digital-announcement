@@ -91,11 +91,13 @@ export default function AdminAnnouncementsPage() {
     setDeleteModalOpen(true);
   };
 
-  const filteredAnnouncements = announcements.filter(
-    (ann) =>
-      ann.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ann.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const source = Array.isArray(announcements) ? announcements : [];
+  const filteredAnnouncements = source.filter((ann) => {
+    const q = searchQuery.toLowerCase();
+    const title = (ann.title ?? '').toLowerCase();
+    const content = (ann.content ?? '').toLowerCase();
+    return q === '' || title.includes(q) || content.includes(q);
+  });
 
   if (isLoading) {
     return (

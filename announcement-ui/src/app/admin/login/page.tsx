@@ -8,7 +8,7 @@ import { Button, Input, Card, CardContent } from "@/components/ui";
 import { useAuthStore } from "@/stores";
 import { ROUTES } from "@/config/constants";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
   
@@ -79,7 +79,7 @@ export default function LoginPage() {
               <Input
                 label="Email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="Masukkan email Anda"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -118,14 +118,6 @@ export default function LoginPage() {
             </form>
           </CardContent>
         </Card>
-
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-          <p className="text-slate-400 text-sm">Demo Credentials:</p>
-          <p className="text-slate-300 text-sm font-mono mt-1">
-            admin@example.com / admin123
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -25,15 +25,9 @@ export default function HomePage() {
           <div className="flex items-center gap-4">
             <Link
               href="/user"
-              className="px-4 py-2 text-slate-300 hover:text-white transition-colors"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-300"
             >
               Lihat Pengumuman
-            </Link>
-            <Link
-              href="/login"
-              className="px-6 py-2.5 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-300"
-            >
-              Login Admin
             </Link>
           </div>
         </div>
@@ -62,7 +56,7 @@ export default function HomePage() {
             Platform digital announcement yang memudahkan Anda mengelola dan menyebarkan informasi penting kepada semua pengguna dengan cepat dan efisien.
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Button */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/user"
@@ -70,12 +64,6 @@ export default function HomePage() {
             >
               Lihat Pengumuman
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/login"
-              className="px-8 py-4 rounded-2xl bg-white/5 text-white font-semibold border border-white/10 hover:bg-white/10 transition-all duration-300"
-            >
-              Login sebagai Admin
             </Link>
           </div>
         </div>

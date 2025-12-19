@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Filter, Grid, List } from "lucide-react";
-import { Card, CardContent, Spinner } from "@/components/ui";
+import { Search, Grid, List } from "lucide-react";
+import { Card, CardContent } from "@/components/ui";
 import { AnnouncementList } from "@/components/announcements";
 import { announcementsApi } from "@/lib/api";
 import type { Announcement } from "@/types";
@@ -18,9 +18,12 @@ export default function UserAnnouncementsPage() {
     const fetchAnnouncements = async () => {
       try {
         const data = await announcementsApi.getAll();
-        setAnnouncements(data);
+        // Ensure data is always an array (API normalization happens in api layer)
+        const announcementsData = Array.isArray(data) ? data : [];
+        setAnnouncements(announcementsData);
       } catch (error) {
         console.error("Failed to fetch announcements:", error);
+        setAnnouncements([]);
       } finally {
         setIsLoading(false);
       }
@@ -29,11 +32,13 @@ export default function UserAnnouncementsPage() {
     fetchAnnouncements();
   }, []);
 
-  const filteredAnnouncements = announcements.filter(
-    (ann) =>
-      ann.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ann.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const source = Array.isArray(announcements) ? announcements : [];
+  const filteredAnnouncements = source.filter((ann) => {
+    const q = searchQuery.toLowerCase();
+    const title = (ann.title ?? "").toLowerCase();
+    const content = (ann.content ?? "").toLowerCase();
+    return q === "" || title.includes(q) || content.includes(q);
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
