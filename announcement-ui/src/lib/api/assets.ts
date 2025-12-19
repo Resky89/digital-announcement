@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { API_ENDPOINTS } from '@/config/constants';
-import type { Asset, CreateAssetPayload } from '@/types';
+import type { Asset } from '@/types';
 
 export const assetsApi = {
   // Public
@@ -14,8 +14,16 @@ export const assetsApi = {
   },
 
   // Admin
-  create: async (data: CreateAssetPayload): Promise<Asset> => {
-    const response = await apiClient.post<Asset>(API_ENDPOINTS.ADMIN.ASSETS, data);
+  create: async (announcementId: number, file: File): Promise<Asset> => {
+    const formData = new FormData();
+    formData.append('announcement_id', String(announcementId));
+    formData.append('file', file);
+
+    const response = await apiClient.post<Asset>(
+      API_ENDPOINTS.ADMIN.ASSETS,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
     return response.data;
   },
 

@@ -16,6 +16,8 @@ class StoreAnnouncementRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'assets' => 'sometimes|array',
+            'assets.*' => 'file|mimes:jpg,jpeg,png,gif,svg,pdf|max:5120',
         ];
     }
 }

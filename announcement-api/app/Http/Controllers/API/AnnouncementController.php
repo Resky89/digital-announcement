@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAnnouncementRequest;
 use App\Http\Requests\UpdateAnnouncementRequest;
 use App\Models\Announcement;
+use App\Models\Asset;
+use App\Services\AssetService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -29,11 +31,30 @@ class AnnouncementController extends Controller
         return response()->json($items);
     }
 
-    public function store(StoreAnnouncementRequest $request)
+    public function store(StoreAnnouncementRequest $request, AssetService $assetService)
     {
         $data = $request->validated();
+        $files = $request->file('assets', []);
+        unset($data['assets']);
         $data['author_id'] = Auth::id();
         $announcement = Announcement::create($data);
+
+        // Save assets if provided
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                if ($file) {
+                    $stored = $assetService->store($file, (int) $announcement->id);
+                    Asset::create([
+                        'announcement_id' => $stored['announcement_id'],
+                        'file_name' => $stored['file_name'],
+                        'file_path' => $stored['file_path'],
+                        'file_type' => $stored['file_type'],
+                        'created_at' => now(),
+                    ]);
+                }
+            }
+        }
+
         $announcement->load(['author', 'assets']);
         return response()->json($announcement, 201);
     }

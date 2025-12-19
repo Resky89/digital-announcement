@@ -37,7 +37,7 @@ export function getInitials(name: string): string {
 }
 
 export function getFileTypeIcon(fileType: string): string {
-  if (fileType.startsWith('image/')) return '🖼️';
+  if (fileType === 'image' || fileType.startsWith('image/')) return '🖼️';
   if (fileType.startsWith('video/')) return '🎬';
   if (fileType.startsWith('audio/')) return '🎵';
   if (fileType.includes('pdf')) return '📄';
@@ -47,7 +47,7 @@ export function getFileTypeIcon(fileType: string): string {
 }
 
 export function isImageFile(fileType: string): boolean {
-  return fileType.startsWith('image/');
+  return fileType === 'image' || fileType.startsWith('image/');
 }
 
 export function isVideoFile(fileType: string): boolean {

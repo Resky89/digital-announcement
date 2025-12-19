@@ -136,7 +136,8 @@ export default function AdminUsersPage() {
     setDeleteModalOpen(true);
   };
 
-  const filteredUsers = users.filter(
+  const source = Array.isArray(users) ? users : [];
+  const filteredUsers = source.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())

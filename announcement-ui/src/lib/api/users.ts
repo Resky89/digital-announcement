@@ -3,9 +3,15 @@ import { API_ENDPOINTS } from '@/config/constants';
 import type { User, CreateUserPayload, UpdateUserPayload } from '@/types';
 
 export const usersApi = {
-  getAll: async (): Promise<User[]> => {
-    const response = await apiClient.get<User[]>(API_ENDPOINTS.ADMIN.USERS);
-    return response.data;
+  getAll: async (params?: { search?: string; per_page?: number; page?: number }): Promise<User[]> => {
+    const response = await apiClient.get(API_ENDPOINTS.ADMIN.USERS, { params });
+    const payload: any = response.data;
+    const list =
+      Array.isArray(payload) ? payload :
+      Array.isArray(payload?.data) ? payload.data :
+      Array.isArray(payload?.results) ? payload.results :
+      Array.isArray(payload?.items) ? payload.items : [];
+    return list as User[];
   },
 
   getById: async (id: number): Promise<User> => {

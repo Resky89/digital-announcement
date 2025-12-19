@@ -57,10 +57,10 @@ class AssetController extends Controller
     public function stream(Asset $asset)
     {
         $path = $asset->file_path;
-        if (!Storage::disk('local')->exists($path)) {
+        if (!Storage::disk('announcement_assets')->exists($path)) {
             return response()->json(['message' => 'File not found'], 404);
         }
-        $absolute = Storage::disk('local')->path($path);
+        $absolute = Storage::disk('announcement_assets')->path($path);
         $mime = mime_content_type($absolute) ?: 'application/octet-stream';
         return response()->file($absolute, ['Content-Type' => $mime]);
     }

@@ -14,7 +14,8 @@ class AssetService
         $dir = $type === 'pdf' ? 'assets/pdfs' : 'assets/images';
         $filename = uniqid() . '_' . time() . '.' . $extension;
 
-        $path = $file->storeAs($dir, $filename, 'local');
+        // Store into external announcement_assets disk
+        $path = $file->storeAs($dir, $filename, 'announcement_assets');
 
         return [
             'announcement_id' => $announcementId,
@@ -26,6 +27,6 @@ class AssetService
 
     public function delete(string $path): void
     {
-        Storage::disk('local')->delete($path);
+        Storage::disk('announcement_assets')->delete($path);
     }
 }

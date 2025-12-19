@@ -253,14 +253,16 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
                 ],
                 "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Pengumuman Baru\",\n  \"content\": \"Konten pengumuman\"\n}"
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "title", "type": "text", "value": "Pengumuman Baru" },
+                    { "key": "content", "type": "text", "value": "Konten pengumuman" },
+                    { "key": "assets[]", "type": "file", "src": "" },
+                    { "key": "assets[]", "type": "file", "src": "" }
+                  ]
                 },
                 "url": "{{baseUrl}}/api/admin/announcements"
               },
@@ -337,14 +339,14 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
                 ],
                 "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"announcement_id\": {{announcementId}},\n  \"file_name\": \"gambar_1.jpg\",\n  \"file_path\": \"/assets/gambar_1.jpg\",\n  \"file_type\": \"image/jpeg\"\n}"
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "announcement_id", "value": "{{announcementId}}", "type": "text" },
+                    { "key": "file", "type": "file", "src": "" }
+                  ]
                 },
                 "url": "{{baseUrl}}/api/admin/assets"
               },

@@ -56,6 +56,15 @@ return [
             'report' => false,
         ],
 
+        // External disk for announcement assets (outside of the API project folder)
+        // Default points to ../announcement-asset relative to the API project root.
+        'announcement_assets' => [
+            'driver' => 'local',
+            'root' => env('ANNOUNCEMENT_ASSETS_PATH', base_path('..'.DIRECTORY_SEPARATOR.'announcement-asset')),
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
