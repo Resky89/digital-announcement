@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Search, FileImage, FileVideo, FileText, File, Eye } from "lucide-react";
+import { Trash2, Search, FileImage, FileVideo, FileText, File, Eye, ImageOff } from "lucide-react";
 import {
   Button,
   Card,
@@ -181,24 +181,43 @@ export default function AdminAssetsPage() {
             return (
               <Card key={asset.id} hover className="overflow-hidden">
                 {/* Preview area */}
-                <div className="relative h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <div className="relative h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                   {isImage ? (
                     <img
                       src={`${API_BASE_URL}/${asset.file_path}`}
                       alt={asset.file_name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                        const img = e.currentTarget;
+                        const parent = img.parentElement;
+                        if (parent) {
+                          img.style.display = "none";
+                          // Create placeholder element
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'flex flex-col items-center justify-center gap-2 w-full h-full';
+                          placeholder.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                              <line x1="2" y1="2" x2="22" y2="22"></line>
+                              <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"></path>
+                              <line x1="13.5" y1="13.5" x2="6" y2="21"></line>
+                              <line x1="18" y1="12" x2="21" y2="15"></line>
+                              <path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59"></path>
+                              <path d="M21 15V5a2 2 0 0 0-2-2H9"></path>
+                            </svg>
+                            <span class="text-sm text-slate-500">Gambar tidak tersedia</span>
+                          `;
+                          parent.appendChild(placeholder);
+                        }
                       }}
                     />
-                  ) : null}
-                  <div className={`flex flex-col items-center gap-2 ${isImage ? 'hidden' : ''}`}>
-                    <FileIcon className="w-12 h-12 text-slate-400" />
-                    <span className="text-xs text-slate-500 uppercase">
-                      {asset.file_type.split("/")[1] || "File"}
-                    </span>
-                  </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <FileIcon className="w-12 h-12 text-slate-400" />
+                      <span className="text-xs text-slate-500 uppercase">
+                        {asset.file_type.split("/")[1] || "File"}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <CardContent className="p-4">
@@ -341,6 +360,27 @@ export default function AdminAssetsPage() {
                 src={`${API_BASE_URL}/${previewAsset.file_path}`}
                 alt={previewAsset.file_name}
                 className="max-w-full max-h-[60vh] object-contain rounded-lg"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  const parent = img.parentElement;
+                  if (parent) {
+                    img.style.display = "none";
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'flex flex-col items-center justify-center gap-4 text-center';
+                    placeholder.innerHTML = `
+                      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                        <line x1="2" y1="2" x2="22" y2="22"></line>
+                        <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"></path>
+                        <line x1="13.5" y1="13.5" x2="6" y2="21"></line>
+                        <line x1="18" y1="12" x2="21" y2="15"></line>
+                        <path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59"></path>
+                        <path d="M21 15V5a2 2 0 0 0-2-2H9"></path>
+                      </svg>
+                      <p class="text-slate-500 dark:text-slate-400">Gambar tidak dapat dimuat</p>
+                    `;
+                    parent.appendChild(placeholder);
+                  }
+                }}
               />
             ) : isVideoFile(previewAsset.file_type) ? (
               <video
