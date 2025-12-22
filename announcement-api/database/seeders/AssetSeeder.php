@@ -19,23 +19,23 @@ class AssetSeeder extends Seeder
             $image = Asset::firstOrCreate(
                 [ 'file_name' => "gambar_{$ann->id}.jpg" ],
                 [
-                    'file_path' => "assets/gambar_{$ann->id}.jpg",
+                    'file_path' => "assets/images/gambar_{$ann->id}.jpg",
                     'file_type' => 'image',
                     'created_at' => now(),
                 ]
             );
 
-            $pdf = Asset::firstOrCreate(
-                [ 'file_name' => "dokumen_{$ann->id}.pdf" ],
+            $video = Asset::firstOrCreate(
+                [ 'file_name' => "video_{$ann->id}.mp4" ],
                 [
-                    'file_path' => "assets/dokumen_{$ann->id}.pdf",
-                    'file_type' => 'pdf',
+                    'file_path' => "assets/videos/video_{$ann->id}.mp4",
+                    'file_type' => 'video',
                     'created_at' => now(),
                 ]
             );
 
             // Attach assets to the announcement via pivot
-            $ann->assets()->syncWithoutDetaching([$image->id, $pdf->id]);
+            $ann->assets()->syncWithoutDetaching([$image->id, $video->id]);
         }
     }
 }

@@ -291,29 +291,62 @@ paths:
         '404':
           description: Not Found
   /api/admin/assets:
+    get:
+      tags: [Admin - Assets]
+      summary: List assets (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: announcement_id
+          schema:
+            type: integer
+            nullable: true
+      responses:
+        '200':
+          description: Paginated assets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Asset'
+        '401':
+          description: Unauthorized
     post:
       tags: [Admin - Assets]
-      summary: Create asset metadata
+      summary: Upload asset
       security:
         - bearerAuth: []
       requestBody:
+        description: |
+          Upload image or video.
+          Allowed images: jpg, jpeg, png, gif, svg (max 5MB).
+          Allowed videos: mp4, mov, avi, mkv, webm, mpeg, mpg (max 10MB).
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [announcement_id, file_name, file_path, file_type]
+              required: [file]
               properties:
-                announcement_id:
-                  type: integer
                 file_name:
                   type: string
-                file_path:
+                file:
                   type: string
-                  example: /assets/gambar_1.jpg
-                file_type:
-                  type: string
-                  example: image/jpeg
+                  format: binary
       responses:
         '201':
           description: Created
@@ -323,7 +356,89 @@ paths:
                 $ref: '#/components/schemas/Asset'
         '401':
           description: Unauthorized
+        '422':
+          description: Validation error
   /api/admin/assets/{assetId}:
+    put:
+      tags: [Admin - Assets]
+      summary: Update asset (replace file and/or name)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: |
+          Multipart form. Provide `file_name` to rename, and/or `file` to replace the file.
+          Allowed images: jpg, jpeg, png, gif, svg (max 5MB).
+          Allowed videos: mp4, mov, avi, mkv, webm, mpeg, mpg (max 10MB).
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '422':
+          description: Validation error
+    patch:
+      tags: [Admin - Assets]
+      summary: Update asset (partial)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: |
+          Multipart form. Provide `file_name` to rename, and/or `file` to replace the file.
+          Allowed images: jpg, jpeg, png, gif, svg (max 5MB).
+          Allowed videos: mp4, mov, avi, mkv, webm, mpeg, mpg (max 10MB).
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '422':
+          description: Validation error
     delete:
       tags: [Admin - Assets]
       summary: Delete asset metadata
@@ -507,22 +622,28 @@ components:
         id:
           type: integer
           example: 1
-        announcement_id:
-          type: integer
-          example: 1
         file_name:
           type: string
           example: gambar_1.jpg
         file_path:
           type: string
-          example: /assets/gambar_1.jpg
+          example: assets/images/gambar_1.jpg
         file_type:
           type: string
-          example: image/jpeg
+          enum: [image, video]
         created_at:
           type: string
           format: date-time
           nullable: true
+        announcements:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
     AuthLoginRequest:
       type: object
       required: [email, password]

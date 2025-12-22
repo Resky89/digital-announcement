@@ -24,4 +24,7 @@ WORKDIR /var/www/html
 # Install Composer (available for container usage)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# PHP upload limits (10MB)
+COPY php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 EXPOSE 9000

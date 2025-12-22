@@ -331,12 +331,24 @@
           "name": "Assets",
           "item": [
             {
+              "name": "List assets",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": "{{baseUrl}}/api/admin/assets"
+              },
+              "response": []
+            },
+            {
               "name": "Create asset",
               "request": {
                 "method": "POST",
                 "header": [
                   { "key": "Authorization", "value": "Bearer {{token}}" }
                 ],
+                "description": "Upload image or video. Images: jpg,jpeg,png,gif,svg (max 5MB). Videos: mp4,mov,avi,mkv,webm,mpeg,mpg (max 10MB).",
                 "body": {
                   "mode": "formdata",
                   "formdata": [
@@ -371,6 +383,7 @@
                 "header": [
                   { "key": "Authorization", "value": "Bearer {{token}}" }
                 ],
+                "description": "Replace file and/or rename. Images up to 5MB; Videos up to 10MB.",
                 "body": {
                   "mode": "formdata",
                   "formdata": [

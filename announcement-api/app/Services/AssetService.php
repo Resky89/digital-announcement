@@ -10,8 +10,9 @@ class AssetService
     public function store(UploadedFile $file): array
     {
         $extension = strtolower($file->getClientOriginalExtension());
-        $type = in_array($extension, ['pdf']) ? 'pdf' : 'image';
-        $dir = $type === 'pdf' ? 'assets/pdfs' : 'assets/images';
+        $videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'mpeg', 'mpg'];
+        $type = in_array($extension, $videoExts) ? 'video' : 'image';
+        $dir = $type === 'video' ? 'assets/videos' : 'assets/images';
         $filename = uniqid() . '_' . time() . '.' . $extension;
 
         // Store into external announcement_assets disk
