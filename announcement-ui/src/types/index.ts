@@ -83,10 +83,12 @@ export interface UpdateUserPayload {
 export interface CreateAnnouncementPayload {
   title: string;
   content: string;
+  asset_ids?: number[];
 }
 
 export interface UpdateAnnouncementPayload {
   title?: string;
   content?: string;
+  asset_ids?: number[];
 }
 

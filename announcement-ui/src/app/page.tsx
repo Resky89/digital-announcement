@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { announcementsApi } from "@/lib/api";
 import type { Announcement, Asset } from "@/types";
-import { API_BASE_URL } from "@/config/constants";
+import { API_BASE_URL, API_ENDPOINTS } from "@/config/constants";
 import { Badge, EmptyState, Spinner } from "@/components/ui";
 import { Calendar, FileText, ExternalLink, Clock, Image as ImageIcon, FileType, ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
-import { formatDate, isImageFile } from "@/lib/utils";
+import { formatDate, isImageFile, isVideoFile } from "@/lib/utils";
 
 // Placeholder SVG for broken images
 const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect fill='%231e293b' width='400' height='300'/%3E%3Cg fill='%2364748b'%3E%3Crect x='170' y='100' width='60' height='60' rx='8'/%3E%3Cpath d='M185 175h30l15 25h-60z'/%3E%3Ccircle cx='225' cy='115' r='12'/%3E%3C/g%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%2394a3b8' font-family='system-ui' font-size='14'%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E";
@@ -42,15 +42,15 @@ function DateTimeClock() {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 text-white shadow-2xl border border-white/20">
-      <div className="flex items-center justify-center flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-indigo-300" />
-          <p className="text-xl font-medium text-white/90">{formatDateFull(currentTime)}</p>
+    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-white shadow-xl border border-white/20">
+      <div className="flex items-center justify-center flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-indigo-300" />
+          <p className="text-lg font-medium text-white/90">{formatDateFull(currentTime)}</p>
         </div>
-        <div className="flex items-center gap-4">
-          <Clock className="w-10 h-10 text-indigo-300" />
-          <p className="text-6xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
+        <div className="flex items-center gap-3">
+          <Clock className="w-8 h-8 text-indigo-300" />
+          <p className="text-5xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
             {formatTime(currentTime)}
           </p>
         </div>
@@ -118,10 +118,12 @@ function LazyImage({ src, alt, className }: { src: string; alt: string; classNam
 
 // Announcement Card Component
 function AnnouncementCard({ ann, isActive }: { ann: Announcement; isActive: boolean }) {
-  const imageAssets: Asset[] = (ann.assets || []).filter(a => isImageFile(a.file_type));
-  const pdfAssets: Asset[] = (ann.assets || []).filter(a => a.file_type === 'pdf' || a.file_type.includes('pdf'));
-  const hasImages = imageAssets.length > 0;
-  const hasPdfs = pdfAssets.length > 0;
+const imageAssets: Asset[] = (ann.assets || []).filter(a => isImageFile(a.file_type));
+const videoAssets: Asset[] = (ann.assets || []).filter(a => isVideoFile(a.file_type));
+const pdfAssets: Asset[] = (ann.assets || []).filter(a => a.file_type === 'pdf' || a.file_type.includes('pdf'));
+const hasImages = imageAssets.length > 0;
+const hasVideos = videoAssets.length > 0;
+const hasPdfs = pdfAssets.length > 0;
 
   return (
     <div 
@@ -180,7 +182,7 @@ function AnnouncementCard({ ann, isActive }: { ann: Announcement; isActive: bool
                     : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
               }`}>
                 {imageAssets.map((asset, index) => {
-                  const imageUrl = `${API_BASE_URL}/${asset.file_path}`;
+                  const imageUrl = `${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(asset.id)}`;
                   return (
                     <div 
                       key={asset.id} 
@@ -245,6 +247,41 @@ function AnnouncementCard({ ann, isActive }: { ann: Announcement; isActive: bool
               </div>
             </div>
           )}
+
+          {hasVideos && (
+  <div className="space-y-4">
+    <div className="flex items-center gap-2 text-white/90">
+      <FileType className="w-5 h-5 text-indigo-300" />
+      <h3 className="text-lg font-semibold">Video Lampiran</h3>
+    </div>
+    <div className={`grid gap-4 ${
+      videoAssets.length === 1
+        ? 'grid-cols-1'
+        : videoAssets.length === 2
+          ? 'grid-cols-2'
+          : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+    }`}>
+      {videoAssets.map((asset) => {
+        const videoUrl = `${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(asset.id)}`;
+        return (
+          <div
+            key={asset.id}
+            className="relative rounded-2xl overflow-hidden border-2 border-white/20 hover:border-indigo-400 transition-all duration-300 group aspect-video"
+          >
+            <video
+              src={videoUrl}
+              controls
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+              <p className="text-white text-sm font-medium truncate">{asset.file_name}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+  )}
         </div>
       </div>
     </div>
@@ -414,7 +451,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-4">
       {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
@@ -422,7 +459,7 @@ export default function HomePage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
       </div>
 
-      <div className="relative z-10 w-full space-y-8 px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 w-full max-w-6xl mx-auto space-y-6">
         {/* Real-time Date and Time */}
         <DateTimeClock />
 

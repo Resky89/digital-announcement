@@ -51,5 +51,5 @@ export function isImageFile(fileType: string): boolean {
 }
 
 export function isVideoFile(fileType: string): boolean {
-  return fileType.startsWith('video/');
+  return fileType === 'video' || fileType.startsWith('video/');
 }

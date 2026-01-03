@@ -23,7 +23,7 @@ import {
 } from "@/components/ui";
 import { announcementsApi } from "@/lib/api";
 import { formatDate, getInitials, isImageFile, isVideoFile } from "@/lib/utils";
-import { API_BASE_URL } from "@/config/constants";
+import { API_BASE_URL, API_ENDPOINTS } from '@/config/constants';
 import type { Announcement } from "@/types";
 
 export default function AnnouncementDetailPage() {
@@ -162,7 +162,7 @@ export default function AnnouncementDetailPage() {
                 const FileIcon = getFileIcon(asset.file_type);
                 const isImage = isImageFile(asset.file_type);
                 const isVideo = isVideoFile(asset.file_type);
-                const staticUrl = `${API_BASE_URL}/${asset.file_path}`;
+                const staticUrl = `${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(asset.id)}`;
 
                 return (
                   <div

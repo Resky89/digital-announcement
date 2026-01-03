@@ -58,7 +58,7 @@ class AssetController extends Controller
         return response()->json($asset);
     }
 
-    public function stream(Asset $asset)
+    public function stream(Asset $asset, Request $request)
     {
         $path = $asset->file_path;
         if (!Storage::disk('announcement_assets')->exists($path)) {
@@ -66,7 +66,81 @@ class AssetController extends Controller
         }
         $absolute = Storage::disk('announcement_assets')->path($path);
         $mime = mime_content_type($absolute) ?: 'application/octet-stream';
-        return response()->file($absolute, ['Content-Type' => $mime]);
+        $filesize = filesize($absolute);
+        $range = $request->header('Range');
+
+        if ($range) {
+            if (!preg_match('/bytes=(\d*)-(\d*)/', $range, $matches)) {
+                return response()->json(['message' => 'Invalid Range'], 416, ['Content-Range' => "bytes */$filesize"]);
+            }
+
+            $start = $matches[1] === '' ? null : (int) $matches[1];
+            $end = $matches[2] === '' ? null : (int) $matches[2];
+
+            if ($start === null && $end !== null) {
+                $start = max($filesize - $end, 0);
+                $end = $filesize - 1;
+            } else {
+                if ($start === null) {
+                    $start = 0;
+                }
+                if ($end === null || $end >= $filesize) {
+                    $end = $filesize - 1;
+                }
+            }
+
+            if ($start > $end || $start >= $filesize) {
+                return response()->json(['message' => 'Requested Range Not Satisfiable'], 416, ['Content-Range' => "bytes */$filesize"]);
+            }
+
+            $length = $end - $start + 1;
+
+            return response()->stream(function () use ($absolute, $start, $length) {
+                $handle = fopen($absolute, 'rb');
+                if ($handle === false) {
+                    return;
+                }
+                fseek($handle, $start);
+                $bytesLeft = $length;
+                $chunkSize = 8192;
+                while ($bytesLeft > 0 && !feof($handle)) {
+                    $read = $bytesLeft > $chunkSize ? $chunkSize : $bytesLeft;
+                    $buffer = fread($handle, $read);
+                    if ($buffer === false) {
+                        break;
+                    }
+                    echo $buffer;
+                    flush();
+                    $bytesLeft -= strlen($buffer);
+                }
+                fclose($handle);
+            }, 206, [
+                'Content-Type' => $mime,
+                'Content-Length' => (string) $length,
+                'Content-Range' => "bytes $start-$end/$filesize",
+                'Accept-Ranges' => 'bytes',
+            ]);
+        }
+
+        return response()->stream(function () use ($absolute) {
+            $handle = fopen($absolute, 'rb');
+            if ($handle === false) {
+                return;
+            }
+            while (!feof($handle)) {
+                $buffer = fread($handle, 8192);
+                if ($buffer === false) {
+                    break;
+                }
+                echo $buffer;
+                flush();
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => $mime,
+            'Content-Length' => (string) $filesize,
+            'Accept-Ranges' => 'bytes',
+        ]);
     }
 
     public function destroy(Asset $asset, AssetService $service)

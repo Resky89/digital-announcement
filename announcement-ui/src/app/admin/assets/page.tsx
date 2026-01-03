@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Search, FileImage, FileVideo, FileText, File, Eye, ImageOff } from "lucide-react";
+import { Trash2, Search, FileImage, FileVideo, FileText, File, Eye } from "lucide-react";
 import {
   Button,
   Card,
@@ -11,47 +11,28 @@ import {
   Modal,
   Badge,
 } from "@/components/ui";
-import { announcementsApi, assetsApi } from "@/lib/api";
-import { formatShortDate, getFileTypeIcon, isImageFile, isVideoFile } from "@/lib/utils";
-import type { Asset, Announcement } from "@/types";
-import { API_BASE_URL } from "@/config/constants";
-
-interface AssetWithAnnouncement extends Asset {
-  announcement?: Announcement;
-}
+import { assetsApi } from "@/lib/api";
+import { formatShortDate, isImageFile, isVideoFile } from "@/lib/utils";
+import type { Asset } from "@/types";
+import { API_BASE_URL, API_ENDPOINTS } from "@/config/constants";
 
 export default function AdminAssetsPage() {
-  const [assets, setAssets] = useState<AssetWithAnnouncement[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [announcementsList, setAnnouncementsList] = useState<Announcement[]>([]);
-  const [formAnnouncementId, setFormAnnouncementId] = useState<number | "">("");
+  const [formFileName, setFormFileName] = useState<string>("");
   const [formFile, setFormFile] = useState<File | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchAssets = async () => {
     try {
-      const announcementsData = await announcementsApi.getAll();
-      const allAssets: AssetWithAnnouncement[] = [];
-
-      announcementsData.forEach((announcement) => {
-        if (announcement.assets) {
-          announcement.assets.forEach((asset) => {
-            allAssets.push({
-              ...asset,
-              announcement,
-            });
-          });
-        }
-      });
-
-      setAssets(allAssets);
-      setAnnouncementsList(announcementsData);
+      const list = await assetsApi.list();
+      setAssets(list);
     } catch (error) {
       console.error("Failed to fetch assets:", error);
     } finally {
@@ -90,8 +71,7 @@ export default function AdminAssetsPage() {
 
   const filteredAssets = assets.filter(
     (asset) =>
-      asset.file_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.announcement?.title.toLowerCase().includes(searchQuery.toLowerCase())
+      asset.file_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
@@ -103,14 +83,14 @@ export default function AdminAssetsPage() {
   }
 
   const resetForm = () => {
-    setFormAnnouncementId("");
+    setFormFileName("");
     setFormFile(null);
     setFormErrors({});
   };
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (!formAnnouncementId) errors.announcement_id = "Pengumuman wajib dipilih";
+    if (!formFileName.trim()) errors.file_name = "Nama file wajib diisi";
     if (!formFile) errors.file = "File wajib dipilih";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -118,10 +98,10 @@ export default function AdminAssetsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm() || !formFile || !formAnnouncementId) return;
+    if (!validateForm() || !formFile) return;
     setIsSubmitting(true);
     try {
-      await assetsApi.create(Number(formAnnouncementId), formFile);
+      await assetsApi.create(formFileName, formFile);
       await fetchAssets();
       setFormOpen(false);
       resetForm();
@@ -177,6 +157,7 @@ export default function AdminAssetsPage() {
           {filteredAssets.map((asset) => {
             const FileIcon = getFileIcon(asset.file_type);
             const isImage = isImageFile(asset.file_type);
+            const assetUrl = `${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(asset.id)}`;
 
             return (
               <Card key={asset.id} hover className="overflow-hidden">
@@ -184,7 +165,7 @@ export default function AdminAssetsPage() {
                 <div className="relative h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                   {isImage ? (
                     <img
-                      src={`${API_BASE_URL}/${asset.file_path}`}
+                      src={assetUrl}
                       alt={asset.file_name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -226,12 +207,7 @@ export default function AdminAssetsPage() {
                     {asset.file_name}
                   </h3>
 
-                  {/* Announcement link */}
-                  {asset.announcement && (
-                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate mt-1">
-                      📢 {asset.announcement.title}
-                    </p>
-                  )}
+                  
 
                   {/* Meta */}
                   <div className="flex items-center justify-between mt-3">
@@ -279,26 +255,23 @@ export default function AdminAssetsPage() {
           if (!open) resetForm();
         }}
         title="Tambah Asset"
-        description="Pilih pengumuman dan file untuk diunggah"
+        description="Isi nama file dan unggah file"
         size="md"
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Pengumuman
+              Nama File
             </label>
-            <select
+            <input
+              type="text"
+              value={formFileName}
+              onChange={(e) => setFormFileName(e.target.value)}
+              placeholder="Masukkan nama file"
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={formAnnouncementId}
-              onChange={(e) => setFormAnnouncementId(e.target.value ? Number(e.target.value) : "")}
-            >
-              <option value="">Pilih pengumuman</option>
-              {announcementsList.map((a) => (
-                <option key={a.id} value={a.id}>{a.title}</option>
-              ))}
-            </select>
-            {formErrors.announcement_id && (
-              <p className="text-sm text-red-500 mt-1">{formErrors.announcement_id}</p>
+            />
+            {formErrors.file_name && (
+              <p className="text-sm text-red-500 mt-1">{formErrors.file_name}</p>
             )}
           </div>
 
@@ -308,7 +281,7 @@ export default function AdminAssetsPage() {
             </label>
             <input
               type="file"
-              accept="image/*,application/pdf"
+              accept="image/*,video/*,application/pdf"
               onChange={(e) => setFormFile(e.target.files ? e.target.files[0] : null)}
               className="block w-full text-slate-900 dark:text-white file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-300"
             />
@@ -357,7 +330,7 @@ export default function AdminAssetsPage() {
           <div className="flex items-center justify-center min-h-[300px]">
             {isImageFile(previewAsset.file_type) ? (
               <img
-                src={`${API_BASE_URL}/${previewAsset.file_path}`}
+                src={`${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(previewAsset.id)}`}
                 alt={previewAsset.file_name}
                 className="max-w-full max-h-[60vh] object-contain rounded-lg"
                 onError={(e) => {
@@ -386,7 +359,7 @@ export default function AdminAssetsPage() {
               <video
                 controls
                 className="max-w-full max-h-[60vh] rounded-lg"
-                src={`${API_BASE_URL}/${previewAsset.file_path}`}
+               src={`${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(previewAsset.id)}`}
               />
             ) : (
               <div className="text-center">
@@ -395,7 +368,7 @@ export default function AdminAssetsPage() {
                   Preview tidak tersedia untuk tipe file ini
                 </p>
                 <a
-                  href={`${API_BASE_URL}/${previewAsset.file_path}`}
+                  href={`${API_BASE_URL}${API_ENDPOINTS.PUBLIC.ASSET_STREAM(previewAsset.id)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 mt-4 text-indigo-600 hover:text-indigo-700"
